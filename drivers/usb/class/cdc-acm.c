@@ -53,6 +53,22 @@ static DEFINE_MUTEX(acm_minors_lock);
 static void acm_tty_set_termios(struct tty_struct *tty,
 				struct ktermios *termios_old);
 
+#ifdef CONFIG_USB_ACM_RAW
+/*
+ * Set raw flags (ported from glibc 2.19)
+ */
+static void acm_cfmakeraw(struct ktermios *t)
+{
+	t->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+	t->c_oflag &= ~OPOST;
+	t->c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+	t->c_cflag &= ~(CSIZE|PARENB);
+	t->c_cflag |= CS8;
+	t->c_cc[VMIN] = 1;	/* read returns when one char is available.  */
+	t->c_cc[VTIME] = 0;
+}
+#endif /* CONFIG_USB_ACM_RAW */
+
 /*
  * acm_minors accessors
  */
@@ -1994,6 +2010,10 @@ static int __init acm_init(void)
 	acm_tty_driver->subtype = SERIAL_TYPE_NORMAL,
 	acm_tty_driver->flags = TTY_DRIVER_REAL_RAW | TTY_DRIVER_DYNAMIC_DEV;
 	acm_tty_driver->init_termios = tty_std_termios;
+#ifdef CONFIG_USB_ACM_RAW
+	acm_cfmakeraw(&acm_tty_driver->init_termios);
+	printk(KERN_INFO KBUILD_MODNAME ": Device will start in RAW mode...\n");
+#endif /* CONFIG_USB_ACM_RAW */
 	acm_tty_driver->init_termios.c_cflag = B9600 | CS8 | CREAD |
 								HUPCL | CLOCAL;
 	tty_set_operations(acm_tty_driver, &acm_ops);

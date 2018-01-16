@@ -19,6 +19,16 @@ config USB_ACM
 	  To compile this driver as a module, choose M here: the
 	  module will be called cdc-acm.
 
+config USB_ACM_RAW
+	bool "Initialize CDC ACM in RAW mode"
+	depends on USB_ACM
+	default y
+	---help---
+	To avoid that a sending device filling the output buffer via echo
+	processing before opening the device file turn this paramter on.
+	If you use CDC ACM to transmit raw data say "Y", but if you use it as
+	standard tty device say "N".
+
 config USB_PRINTER
 	tristate "USB Printer support"
 	help
