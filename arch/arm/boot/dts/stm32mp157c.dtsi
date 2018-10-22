@@ -964,6 +964,15 @@
 			#dma-cells = <4>;
 			st,mem2mem;
 			dma-requests = <8>;
+			dmas = <&mdma1 0 0x11 0x1200000a 0x48000008 0x00000020 1>,
+			       <&mdma1 1 0x11 0x1200000a 0x48000008 0x00000800 1>,
+			       <&mdma1 2 0x11 0x1200000a 0x48000008 0x00200000 1>,
+			       <&mdma1 3 0x11 0x1200000a 0x48000008 0x08000000 1>,
+			       <&mdma1 4 0x11 0x1200000a 0x4800000C 0x00000020 1>,
+			       <&mdma1 5 0x11 0x1200000a 0x4800000C 0x00000800 1>,
+			       <&mdma1 6 0x11 0x1200000a 0x4800000C 0x00200000 1>,
+			       <&mdma1 7 0x11 0x1200000a 0x4800000C 0x08000000 1>;
+			dma-names = "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7";
 		};
 
 		dma2: dma@48001000 {
@@ -981,6 +990,15 @@
 			#dma-cells = <4>;
 			st,mem2mem;
 			dma-requests = <8>;
+			dmas = <&mdma1 8 0x11 0x1200000a 0x48001008 0x00000020 1>,
+			       <&mdma1 9 0x11 0x1200000a 0x48001008 0x00000800 1>,
+			       <&mdma1 10 0x11 0x1200000a 0x48001008 0x00200000 1>,
+			       <&mdma1 11 0x11 0x1200000a 0x48001008 0x08000000 1>,
+			       <&mdma1 12 0x11 0x1200000a 0x4800100C 0x00000020 1>,
+			       <&mdma1 13 0x11 0x1200000a 0x4800100C 0x00000800 1>,
+			       <&mdma1 14 0x11 0x1200000a 0x4800100C 0x00200000 1>,
+			       <&mdma1 15 0x11 0x1200000a 0x4800100C 0x08000000 1>;
+			dma-names = "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7";
 		};
 
 		dmamux1: dma-router@48002000 {
@@ -1273,7 +1291,7 @@
 			interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&rcc HASH1>;
 			resets = <&rcc HASH1_R>;
-			dmas = <&mdma1 31 0x10 0x1000A02 0x0 0x0>;
+			dmas = <&mdma1 31 0x10 0x1000A02 0x0 0x0 0x0 0x0>;
 			dma-names = "in";
 			dma-maxburst = <2>;
 			status = "disabled";
@@ -1292,7 +1310,7 @@
 			reg = <0x58000000 0x1000>;
 			interrupts = <GIC_SPI 122 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&rcc MDMA>;
-			#dma-cells = <5>;
+			#dma-cells = <6>;
 			dma-channels = <32>;
 			dma-requests = <48>;
 		};
@@ -1492,8 +1510,8 @@
 			interrupts = <GIC_SPI 86 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&rcc SPI6_K>;
 			resets = <&rcc SPI6_R>;
-			dmas = <&mdma1 34 0x0 0x40008 0x0 0x0>,
-			       <&mdma1 35 0x0 0x40002 0x0 0x0>;
+			dmas = <&mdma1 34 0x0 0x40008 0x0 0x0 0x0>,
+			       <&mdma1 35 0x0 0x40002 0x0 0x0 0x0>;
 			dma-names = "rx", "tx";
 			status = "disabled";
 		};
