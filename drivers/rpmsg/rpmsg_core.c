@@ -283,6 +283,26 @@ int rpmsg_trysend_offchannel(struct rpmsg_endpoint *ept, u32 src, u32 dst,
 }
 EXPORT_SYMBOL(rpmsg_trysend_offchannel);
 
+/**
+ * rpmsg_get_buf_payload_size()
+ * This function returns buffer payload size available for sending messages.
+ *
+ * @ept: the rpmsg endpoint
+ *
+ * Returns buffer payload size on success and an appropriate error value on
+ * failure.
+ */
+int rpmsg_get_buf_payload_size(struct rpmsg_endpoint *ept)
+{
+	if (WARN_ON(!ept))
+		return -EINVAL;
+	if (!ept->ops->get_buf_payload_size)
+		return -ENXIO;
+
+	return ept->ops->get_buf_payload_size(ept);
+}
+EXPORT_SYMBOL(rpmsg_get_buf_payload_size);
+
 /*
  * match a rpmsg channel with a channel info struct.
  * this is used to make sure we're not creating rpmsg devices for channels
