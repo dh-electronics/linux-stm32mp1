@@ -26,3 +26,11 @@
 		stdout-path = "serial0:115200n8";
 	};
 };
+
+&cpu0 {
+	cpu-supply = <&vddcore>;
+};
+
+&cpu1 {
+	cpu-supply = <&vddcore>;
+};
