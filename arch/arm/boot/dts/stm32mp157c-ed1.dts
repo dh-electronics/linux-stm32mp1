@@ -128,6 +128,14 @@
 	};
 };
 
+&cpu0{
+	cpu-supply = <&vddcore>;
+};
+
+&cpu1{
+	cpu-supply = <&vddcore>;
+};
+
 &dts {
 	status = "okay";
 };
