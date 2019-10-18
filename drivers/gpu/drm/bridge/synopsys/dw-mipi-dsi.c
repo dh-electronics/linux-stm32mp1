@@ -213,6 +213,20 @@
 
 #define DSI_INT_ST0			0xbc
 #define DSI_INT_ST1			0xc0
+#define GPRXE				BIT(12)
+#define GPRDE				BIT(11)
+#define GPTXE				BIT(10)
+#define GPWRE				BIT(9)
+#define GCWRE				BIT(8)
+#define DPIPLDWE			BIT(7)
+#define EOTPE				BIT(6)
+#define PSE				BIT(5)
+#define CRCE				BIT(4)
+#define ECCME				BIT(3)
+#define ECCSE				BIT(2)
+#define TOLPRX				BIT(1)
+#define TOHSTX				BIT(0)
+
 #define DSI_INT_MSK0			0xc4
 #define DSI_INT_MSK1			0xc8
 
@@ -431,6 +445,42 @@ static int dw_mipi_dsi_gen_pkt_hdr_write(struct dw_mipi_dsi *dsi, u32 hdr_val)
 	return 0;
 }
 
+static int dw_mipi_dsi_read_status(struct dw_mipi_dsi *dsi)
+{
+	u32 val;
+
+	val = dsi_read(dsi, DSI_INT_ST1);
+
+	if (val & GPRXE)
+		DRM_DEBUG_DRIVER("DSI Generic payload receive error\n");
+	if (val & GPRDE)
+		DRM_DEBUG_DRIVER("DSI Generic payload read error\n");
+	if (val & GPTXE)
+		DRM_DEBUG_DRIVER("DSI Generic payload transmit error\n");
+	if (val & GPWRE)
+		DRM_DEBUG_DRIVER("DSI Generic payload write error\n");
+	if (val & GCWRE)
+		DRM_DEBUG_DRIVER("DSI Generic command write error\n");
+	if (val & DPIPLDWE)
+		DRM_DEBUG_DRIVER("DSI DPI payload write error\n");
+	if (val & EOTPE)
+		DRM_DEBUG_DRIVER("DSI EoTp error\n");
+	if (val & PSE)
+		DRM_DEBUG_DRIVER("DSI Packet size error\n");
+	if (val & CRCE)
+		DRM_DEBUG_DRIVER("DSI CRC error\n");
+	if (val & ECCME)
+		DRM_DEBUG_DRIVER("DSI ECC multi-bit error\n");
+	if (val & ECCSE)
+		DRM_DEBUG_DRIVER("DSI ECC single-bit error\n");
+	if (val & TOLPRX)
+		DRM_DEBUG_DRIVER("DSI Timeout low-power reception\n");
+	if (val & TOHSTX)
+		DRM_DEBUG_DRIVER("DSI Timeout high-speed transmission\n");
+
+	return val;
+}
+
 static int dw_mipi_dsi_write(struct dw_mipi_dsi *dsi,
 			     const struct mipi_dsi_packet *packet)
 {
@@ -459,6 +509,12 @@ static int dw_mipi_dsi_write(struct dw_mipi_dsi *dsi,
 			dev_err(dsi->dev,
 				"failed to get available write payload FIFO\n");
 			return ret;
+		}
+
+		val = dw_mipi_dsi_read_status(dsi);
+		if (val) {
+			dev_err(dsi->dev, "dsi status error 0x%0x\n", val);
+			return -EINVAL;
 		}
 	}
 
@@ -493,6 +549,12 @@ static int dw_mipi_dsi_read(struct dw_mipi_dsi *dsi,
 			return ret;
 		}
 
+		val = dw_mipi_dsi_read_status(dsi);
+		if (val) {
+			dev_err(dsi->dev, "dsi status error 0x%0x\n", val);
+			return -EINVAL;
+		}
+
 		val = dsi_read(dsi, DSI_GEN_PLD_DATA);
 		for (j = 0; j < 4 && j + i < len; j++)
 			buf[i + j] = val >> (8 * j);
@@ -507,6 +569,7 @@ static ssize_t dw_mipi_dsi_host_transfer(struct mipi_dsi_host *host,
 	struct dw_mipi_dsi *dsi = host_to_dsi(host);
 	struct mipi_dsi_packet packet;
 	int ret, nb_bytes;
+	int retry = 3;
 
 	ret = mipi_dsi_create_packet(&packet, msg);
 	if (ret) {
@@ -518,23 +581,31 @@ static ssize_t dw_mipi_dsi_host_transfer(struct mipi_dsi_host *host,
 	if (dsi->slave)
 		dw_mipi_message_config(dsi->slave, msg);
 
-	ret = dw_mipi_dsi_write(dsi, &packet);
-	if (ret)
-		return ret;
-	if (dsi->slave) {
-		ret = dw_mipi_dsi_write(dsi->slave, &packet);
+	while (retry--) {
+		ret = dw_mipi_dsi_write(dsi, &packet);
 		if (ret)
-			return ret;
+			continue;
+
+		if (dsi->slave) {
+			ret = dw_mipi_dsi_write(dsi->slave, &packet);
+			if (ret)
+				continue;
+		}
+
+		if (msg->rx_buf && msg->rx_len) {
+			ret = dw_mipi_dsi_read(dsi, msg);
+			if (ret)
+				continue;
+			nb_bytes = msg->rx_len;
+			break;
+		} else {
+			nb_bytes = packet.size;
+			break;
+		}
 	}
 
-	if (msg->rx_buf && msg->rx_len) {
-		ret = dw_mipi_dsi_read(dsi, msg);
-		if (ret)
-			return ret;
-		nb_bytes = msg->rx_len;
-	} else {
-		nb_bytes = packet.size;
-	}
+	if (ret)
+		return ret;
 
 	return nb_bytes;
 }
