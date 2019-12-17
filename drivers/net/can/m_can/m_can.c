@@ -1200,6 +1200,8 @@ static void m_can_start(struct net_device *dev)
 	/* basic m_can configuration */
 	m_can_chip_config(dev);
 
+	pinctrl_pm_select_default_state(cdev->dev);
+
 	cdev->can.state = CAN_STATE_ERROR_ACTIVE;
 
 	m_can_enable_all_interrupts(cdev);
