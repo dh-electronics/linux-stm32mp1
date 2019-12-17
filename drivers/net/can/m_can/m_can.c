@@ -1196,11 +1196,19 @@ static void m_can_chip_config(struct net_device *dev)
 static void m_can_start(struct net_device *dev)
 {
 	struct m_can_classdev *cdev = netdev_priv(dev);
+	struct pinctrl *p;
 
 	/* basic m_can configuration */
 	m_can_chip_config(dev);
 
 	cdev->can.state = CAN_STATE_ERROR_ACTIVE;
+
+	/* Attempt to use "active" if available else use "default" */
+	p = pinctrl_get_select(cdev->dev, "active");
+	if (!IS_ERR(p))
+		pinctrl_put(p);
+	else
+		pinctrl_pm_select_default_state(cdev->dev);
 
 	m_can_enable_all_interrupts(cdev);
 }
