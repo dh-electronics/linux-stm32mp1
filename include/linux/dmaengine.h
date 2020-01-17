@@ -1474,9 +1474,11 @@ struct dma_chan *__dma_request_channel(const dma_cap_mask_t *mask,
 				       struct device_node *np);
 
 struct dma_chan *dma_request_chan(struct device *dev, const char *name);
+struct dma_chan *dma_request_chan_linked(struct device *dev, const char *name);
 struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
 
 void dma_release_channel(struct dma_chan *chan);
+void dma_release_chan_linked(struct device *dev, struct dma_chan *chan);
 int dma_get_slave_caps(struct dma_chan *chan, struct dma_slave_caps *caps);
 #else
 static inline struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type)
@@ -1506,12 +1508,21 @@ static inline struct dma_chan *dma_request_chan(struct device *dev,
 {
 	return ERR_PTR(-ENODEV);
 }
+static inline struct dma_chan *dma_request_chan_linked(struct device *dev,
+						       const char *name)
+{
+	return ERR_PTR(-ENODEV);
+}
 static inline struct dma_chan *dma_request_chan_by_mask(
 						const dma_cap_mask_t *mask)
 {
 	return ERR_PTR(-ENODEV);
 }
 static inline void dma_release_channel(struct dma_chan *chan)
+{
+}
+static inline void dma_release_chan_linked(struct device *dev,
+					   struct dma_chan *chan)
 {
 }
 static inline int dma_get_slave_caps(struct dma_chan *chan,
