@@ -95,6 +95,52 @@
 	status = "okay";
 };
 
+&fmc {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&fmc_pins_b>;
+	pinctrl-1 = <&fmc_sleep_pins_b>;
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <1>;
+	/delete-property/interrupts;
+	/delete-property/dmas;
+	/delete-property/dma-names;
+	reg = <0x58002000 0x1000>;
+	ranges;
+
+	ebi {
+		#address-cells = <2>;
+		#size-cells = <1>;
+		compatible = "st,stm32mp1-fmc2-ebi";
+		ranges = <0 0 0x60000000 0x4000000>,
+			 <1 0 0x64000000 0x4000000>,
+			 <2 0 0x68000000 0x4000000>,
+			 <3 0 0x6c000000 0x4000000>;
+
+		ksz8851: ks8851mll@0,0 {
+			compatible = "micrel,ks8851-mll";
+			reg = <1 0x0 0x2 1 0x2 0x20000>;
+			interrupt-parent = <&gpioc>;
+			interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
+			bank-width = <2>;
+
+			/* Timing values are in nS */
+			st,fmc2_ebi_cs_mux_enable;
+			st,fmc2_ebi_cs_transaction_type = <4>;
+			st,fmc2_ebi_cs_buswidth = <16>;
+			st,fmc2_ebi_cs_address_setup = <6>;
+			st,fmc2_ebi_cs_address_hold = <6>;
+			st,fmc2_ebi_cs_data_setup = <127>;
+			st,fmc2_ebi_cs_bus_turnaround = <9>;
+			st,fmc2_ebi_cs_data_hold = <9>;
+		};
+	};
+};
+
+&gpioc {
+	status = "okay";
+};
+
 &gpu {
 	status = "okay";
 };
@@ -281,6 +327,63 @@
 	interrupt-parent = <&exti>;
 	interrupts = <68 1>;
 	status = "okay";
+};
+
+&pinctrl {
+	fmc_pins_b: fmc-1 {
+		pins1 {
+			pinmux = <STM32_PINMUX('D', 4, AF12)>, /* FMC_NOE */
+				 <STM32_PINMUX('D', 5, AF12)>, /* FMC_NWE */
+				 <STM32_PINMUX('B', 7, AF12)>, /* FMC_NL */
+				 <STM32_PINMUX('D', 14, AF12)>, /* FMC_D0 */
+				 <STM32_PINMUX('D', 15, AF12)>, /* FMC_D1 */
+				 <STM32_PINMUX('D', 0, AF12)>, /* FMC_D2 */
+				 <STM32_PINMUX('D', 1, AF12)>, /* FMC_D3 */
+				 <STM32_PINMUX('E', 7, AF12)>, /* FMC_D4 */
+				 <STM32_PINMUX('E', 8, AF12)>, /* FMC_D5 */
+				 <STM32_PINMUX('E', 9, AF12)>, /* FMC_D6 */
+				 <STM32_PINMUX('E', 10, AF12)>, /* FMC_D7 */
+				 <STM32_PINMUX('E', 11, AF12)>, /* FMC_D8 */
+				 <STM32_PINMUX('E', 12, AF12)>, /* FMC_D9 */
+				 <STM32_PINMUX('E', 13, AF12)>, /* FMC_D10 */
+				 <STM32_PINMUX('E', 14, AF12)>, /* FMC_D11 */
+				 <STM32_PINMUX('E', 15, AF12)>, /* FMC_D12 */
+				 <STM32_PINMUX('D', 8, AF12)>, /* FMC_D13 */
+				 <STM32_PINMUX('D', 9, AF12)>, /* FMC_D14 */
+				 <STM32_PINMUX('D', 10, AF12)>, /* FMC_D15 */
+				 <STM32_PINMUX('G', 9, AF12)>, /* FMC_NE2_FMC_NCE */
+				 <STM32_PINMUX('G', 12, AF12)>; /* FMC_NE4 */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <3>;
+		};
+	};
+
+	fmc_sleep_pins_b: fmc-sleep-1 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 4, ANALOG)>, /* FMC_NOE */
+				 <STM32_PINMUX('D', 5, ANALOG)>, /* FMC_NWE */
+				 <STM32_PINMUX('B', 7, ANALOG)>, /* FMC_NL */
+				 <STM32_PINMUX('D', 14, ANALOG)>, /* FMC_D0 */
+				 <STM32_PINMUX('D', 15, ANALOG)>, /* FMC_D1 */
+				 <STM32_PINMUX('D', 0, ANALOG)>, /* FMC_D2 */
+				 <STM32_PINMUX('D', 1, ANALOG)>, /* FMC_D3 */
+				 <STM32_PINMUX('E', 7, ANALOG)>, /* FMC_D4 */
+				 <STM32_PINMUX('E', 8, ANALOG)>, /* FMC_D5 */
+				 <STM32_PINMUX('E', 9, ANALOG)>, /* FMC_D6 */
+				 <STM32_PINMUX('E', 10, ANALOG)>, /* FMC_D7 */
+				 <STM32_PINMUX('E', 11, ANALOG)>, /* FMC_D8 */
+				 <STM32_PINMUX('E', 12, ANALOG)>, /* FMC_D9 */
+				 <STM32_PINMUX('E', 13, ANALOG)>, /* FMC_D10 */
+				 <STM32_PINMUX('E', 14, ANALOG)>, /* FMC_D11 */
+				 <STM32_PINMUX('E', 15, ANALOG)>, /* FMC_D12 */
+				 <STM32_PINMUX('D', 8, ANALOG)>, /* FMC_D13 */
+				 <STM32_PINMUX('D', 9, ANALOG)>, /* FMC_D14 */
+				 <STM32_PINMUX('D', 10, ANALOG)>, /* FMC_D15 */
+				 <STM32_PINMUX('G', 9, ANALOG)>, /* FMC_NE2_FMC_NCE */
+				 <STM32_PINMUX('G', 12, ANALOG)>; /* FMC_NE4 */
+		};
+	};
 };
 
 &pwr_regulators {
