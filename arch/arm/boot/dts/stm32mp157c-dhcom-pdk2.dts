@@ -15,6 +15,7 @@
 		serial1 = &usart3;
 		serial2 = &uart8;
 		ethernet0 = &ethernet0;
+		ethernet1 = &ksz8851;
 	};
 
 	chosen {
