@@ -301,6 +301,7 @@
 		reg = <0x49>;
 		vio-supply = <&v3v3>;
 		interrupts-extended = <&gpioh 3 IRQ_TYPE_EDGE_FALLING>;
+		status = "disabled";
 	};
 
 	eeprom@50 {
