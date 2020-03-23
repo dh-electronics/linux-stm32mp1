@@ -1914,6 +1914,18 @@ config MFD_ROHM_BD70528
 	  10 bits SAR ADC for battery temperature monitor and 1S battery
 	  charger.
 
+config MFD_STM32_FMC2
+	tristate "Support for FMC2 controllers on STM32MP SoCs"
+	depends on MACH_STM32MP157 || COMPILE_TEST
+	select MFD_CORE
+	select REGMAP
+	select REGMAP_MMIO
+	help
+	  Select this option to enable STM32 FMC2 driver used for FMC2 External
+	  Bus Interface controller and FMC2 NAND flash controller. This driver
+	  provides core support for the STM32 FMC2 controllers, in order to use
+	  the actual functionality of the device other drivers must be enabled.
+
 config MFD_STM32_LPTIMER
 	tristate "Support for STM32 Low-Power Timer"
 	depends on (ARCH_STM32 && OF) || COMPILE_TEST
