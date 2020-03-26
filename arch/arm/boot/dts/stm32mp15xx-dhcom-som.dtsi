@@ -107,7 +107,7 @@
 	reg = <0x58002000 0x1000>;
 	ranges;
 
-	ebi {
+	ebi: ebi {
 		#address-cells = <2>;
 		#size-cells = <1>;
 		compatible = "st,stm32mp1-fmc2-ebi";
