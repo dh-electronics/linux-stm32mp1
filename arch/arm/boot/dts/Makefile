@@ -991,6 +991,11 @@ dtb-$(CONFIG_ARCH_STM32) += \
 	stm32h743i-eval.dtb \
 	stm32h743i-disco.dtb \
 	stm32mp157a-avenger96.dtb \
+	stm32mp157a-avenger96-overlay-fdcan1-x6.dtbo \
+	stm32mp157a-avenger96-overlay-fdcan2-x6.dtbo \
+	stm32mp157a-avenger96-overlay-i2c1-eeprom-x6.dtbo \
+	stm32mp157a-avenger96-overlay-i2c2-eeprom-x6.dtbo \
+	stm32mp157a-avenger96-overlay-spi2-eeprom-x6.dtbo \
 	stm32mp157a-dk1.dtb \
 	stm32mp157c-dhcom-pdk2.dtb \
 	stm32mp157c-dhcom-pdk2-overlay-460-200-x11.dtbo \
