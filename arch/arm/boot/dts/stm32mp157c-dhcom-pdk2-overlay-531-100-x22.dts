@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2020 Marek Vasut <marex@denx.de>
+ */
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment-0 {
+		target-path = "/soc/i2c@40013000";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			eeprom@56 {
+				compatible = "atmel,24c04";
+				reg = <0x56>;
+				pagesize = <16>;
+			};
+		};
+	};
+
+	/* SPI2 is not connected on STM32MP1 DHCOM SoM */
+};

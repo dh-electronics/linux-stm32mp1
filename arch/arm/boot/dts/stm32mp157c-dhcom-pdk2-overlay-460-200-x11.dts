@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2020 Marek Vasut <marex@denx.de>
+ */
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment-0 {
+		target-path = "/soc/nand-controller@58002000/ebi";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		__overlay__ {
+			#address-cells = <2>;
+			#size-cells = <1>;
+			sram@3,0 {
+				compatible = "mtd-ram";
+				reg = <3 0x0 0x80000>;
+				bank-width = <2>;
+
+				/* Timing values are in nS */
+				st,fmc2_ebi_cs_mux_enable;
+				st,fmc2_ebi_cs_transaction_type = <4>;
+				st,fmc2_ebi_cs_buswidth = <16>;
+				st,fmc2_ebi_cs_address_setup = <6>;
+				st,fmc2_ebi_cs_address_hold = <6>;
+				st,fmc2_ebi_cs_data_setup = <127>;
+				st,fmc2_ebi_cs_bus_turnaround = <9>;
+				st,fmc2_ebi_cs_data_hold = <9>;
+			};
+		};
+	};
+};
