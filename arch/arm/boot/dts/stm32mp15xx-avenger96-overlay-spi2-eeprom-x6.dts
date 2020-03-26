@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2020 Marek Vasut <marex@denx.de>
+ */
+/dts-v1/;
+/plugin/;
+
+&spi2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi2_pins_a>;
+	status = "okay";
+	cs-gpios = <&gpioi 0 0>;
+	/* Use PIO for the 128 Byte SPI EEPROM */
+	dmas;
+	dma-names;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	at25@0 {
+		compatible = "microchip,25aa010a", "atmel,at25";
+		reg = <0>;
+		spi-max-frequency = <5000000>;
+
+		at25,byte-len = <128>;
+		at25,addr-mode = <1>;
+		at25,page-size = <16>;
+	};
+};
