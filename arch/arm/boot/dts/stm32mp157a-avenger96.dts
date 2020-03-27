@@ -140,6 +140,10 @@
 	};
 };
 
+&gpu {
+	status = "okay";
+};
+
 &i2c1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c1_pins_b>;
