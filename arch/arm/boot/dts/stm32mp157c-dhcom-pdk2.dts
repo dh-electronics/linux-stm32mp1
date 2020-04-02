@@ -280,13 +280,15 @@
 
 	uart8_pins_a: uart8-0 {
 		pins1 {
-			pinmux = <STM32_PINMUX('E', 1, AF8)>; /* UART8_TX */
+			pinmux = <STM32_PINMUX('E', 1, AF8)>, /* UART8_TX */
+				 <STM32_PINMUX('G', 7, AF8)>; /* UART8_RTS */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <0>;
 		};
 		pins2 {
-			pinmux = <STM32_PINMUX('E', 0, AF8)>; /* UART8_RX */
+			pinmux = <STM32_PINMUX('E', 0, AF8)>,  /* UART8_RX */
+				 <STM32_PINMUX('G', 10, AF8)>; /* UART8_CTS */
 			bias-disable;
 		};
 	};
@@ -346,6 +348,7 @@
 &uart8 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart8_pins_a>;
+	uart-has-rtscts;
 	status = "okay";
 };
 
