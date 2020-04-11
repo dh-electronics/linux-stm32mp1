@@ -144,6 +144,41 @@
 	};
 };
 
+&gpioa {
+	gpio-line-names = "", "", "", "",
+			  "", "", "", "",
+			  "", "", "", "DH-GPIO-K",
+			  "DH-GPIO-I", "", "DH-GPIO-A", "";
+};
+
+&gpiob {
+	gpio-line-names = "", "", "", "",
+			  "", "DH-GPIO-J", "", "",
+			  "", "", "", "DH-GPIO-B",
+			  "", "DH-GPIO-L", "", "";
+};
+
+&gpioc {
+	gpio-line-names = "", "", "", "DH-GPIO-C",
+			  "", "", "", "",
+			  "", "", "", "",
+			  "", "", "", "";
+};
+
+&gpiod {
+	gpio-line-names = "", "", "", "",
+			  "", "", "", "",
+			  "DH-GPIO-D", "", "", "",
+			  "", "", "DH-GPIO-E", "DH-GPIO-F";
+};
+
+&gpiof {
+	gpio-line-names = "", "", "", "",
+			  "", "", "", "",
+			  "", "", "", "",
+			  "DH-GPIO-G", "DH-GPIO-H", "", "";
+};
+
 &i2c1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c1_pins_b>;
