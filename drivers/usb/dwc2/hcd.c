@@ -5237,6 +5237,11 @@ int dwc2_hcd_init(struct dwc2_hsotg *hsotg)
 
 	dwc2_enable_global_interrupts(hsotg);
 
+	dwc2_hsotg_core_init_disconnected(hsotg, false);
+	/* Enable ACG feature in device mode,if supported */
+	dwc2_enable_acg(hsotg);
+	dwc2_hsotg_core_connect(hsotg);
+
 	return 0;
 
 error4:
