@@ -389,6 +389,16 @@
 	};
 };
 
+&spi2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi2_pins_a>;
+	status = "disabled";
+	cs-gpios = <&gpioi 0 0>;
+	/* Use PIO for the 128 Byte SPI EEPROM */
+	/delete-property/dmas;
+	/delete-property/dma-names;
+};
+
 &uart4 {
 	/* On Low speed expansion header */
 	label = "LS-UART1";
