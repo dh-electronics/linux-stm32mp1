@@ -995,6 +995,7 @@ dtb-$(CONFIG_ARCH_STM32) += \
 	stm32mp157a-avenger96-overlay-fdcan2-x6.dtbo \
 	stm32mp157a-avenger96-overlay-i2c1-eeprom-x6.dtbo \
 	stm32mp157a-avenger96-overlay-i2c2-eeprom-x6.dtbo \
+	stm32mp157a-avenger96-overlay-ov5640-x7.dtbo \
 	stm32mp157a-avenger96-overlay-spi2-eeprom-x6.dtbo \
 	stm32mp157a-dk1.dtb \
 	stm32mp157c-dhcom-pdk2.dtb \
