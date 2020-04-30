@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2020 Marek Vasut <marex@denx.de>
+ */
+#include <dt-bindings/clock/stm32mp1-clks.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/dts-v1/;
+/plugin/;
+
+&{/} {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	camera0_pwr: regulator-camera0 {
+		compatible = "regulator-fixed";
+		regulator-name = "camera0-reg";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		regulator-always-on;
+	};
+
+	sram@10050000 {
+		compatible = "mmio-sram";
+		reg = <0x10050000 0x10000>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0 0x10050000 0x10000>;
+
+		dma_pool: dma_pool@0 {
+			reg = <0x0 0x10000>;
+			pool;
+		};
+	};
+};
+
+&i2c2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	camera@3c {
+		compatible = "ovti,ov5640";
+		reg = <0x3c>;
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&rcc_pins_a>;
+		pinctrl-1 = <&rcc_sleep_pins_a>;
+		clocks = <&rcc CK_MCO1>;
+		clock-names = "xclk";
+		assigned-clocks = <&rcc CK_MCO1>;
+		assigned-clock-parents = <&rcc CK_HSI>;
+		assigned-clock-rates = <32000000>;
+		DOVDD-supply = <&camera0_pwr>;
+		/* GPIO-J on the Dragonboard Dual-Leopard OV5640 board */
+		powerdown-gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
+		/* GPIO-I on the Dragonboard Dual-Leopard OV5640 board */
+		reset-gpios = <&gpioa 12 GPIO_ACTIVE_LOW>;
+		rotation = <180>;
+		status = "okay";
+
+		port {
+			ov5640_0: endpoint {
+				remote-endpoint = <&stmipi_0>;
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&stmipi {
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			stmipi_0: endpoint {
+				data-lanes = <1 2>;
+				remote-endpoint = <&ov5640_0>;
+			};
+		};
+	};
+};
+
+&dma1 {
+	sram = <&dma_pool>;
+};
+
+&dma2 {
+	sram = <&dma_pool>;
+};
