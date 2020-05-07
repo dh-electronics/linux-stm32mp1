@@ -77,6 +77,16 @@
 	};
 
 	fragment-3 {
+		target-path = "/led";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		__overlay__ {
+			/* LED5 GPIO-E conflicts with touchscreen IRQ */
+			/delete-node/ led-0;
+		};
+	};
+
+	fragment-4 {
 		target-path = "/soc/i2c@40015000";
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -86,6 +96,7 @@
 			polytouch@38 {
 				compatible = "edt,edt-ft5x06";
 				reg = <0x38>;
+				/* Touchscreen IRQ GPIO-E conflicts with LED5 GPIO */
 				interrupt-parent = <&gpiog>;
 				interrupts = <2 IRQ_TYPE_EDGE_FALLING>; /* GPIO E */
 				linux,wakeup;
