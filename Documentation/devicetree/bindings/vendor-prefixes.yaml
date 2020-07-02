@@ -751,6 +751,8 @@ patternProperties:
     description: Point of View International B.V.
   "^powervr,.*":
     description: PowerVR (deprecated, use img)
+  "^powertip,.*":
+    description: Powertip Tech. Corp.
   "^primux,.*":
     description: Primux Trading, S.L.
   "^probox2,.*":
