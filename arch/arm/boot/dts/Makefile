@@ -1081,6 +1081,7 @@ dtb-$(CONFIG_ARCH_STM32) += \
 	stm32mp15xx-dhcom-pdk2-overlay-531-100-x21.dtbo \
 	stm32mp15xx-dhcom-pdk2-overlay-531-100-x22.dtbo \
 	stm32mp15xx-dhcom-pdk2-overlay-560-200-x12.dtbo \
+	stm32mp15xx-dhcom-pdk2-overlay-638-100-x12-rpi7inch.dtbo \
 	stm32mp157c-dk2.dtb \
 	stm32mp157c-ed1.dtb \
 	stm32mp157c-ev1.dtb \
