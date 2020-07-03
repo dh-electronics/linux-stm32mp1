@@ -1,0 +1,29 @@
+TC358764 MIPI-DSI to DPI panel bridge
+
+Required properties:
+  - compatible: "toshiba,tc358762"
+  - reg: the virtual channel number of a DSI peripheral
+  - vddc-supply: core voltage supply, 1.2V
+
+The device node can contain following 'port' child nodes,
+according to the OF graph bindings defined in [1]:
+  0: DSI Input, not required, if the bridge is DSI controlled
+  1: DPI Output, mandatory
+
+[1]: Documentation/devicetree/bindings/media/video-interfaces.txt
+
+Example:
+
+	bridge@0 {
+		reg = <0>;
+		compatible = "toshiba,tc358762";
+		vddc-supply = <&vcc_1v2_reg>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@1 {
+			reg = <1>;
+			lvds_ep: endpoint {
+				remote-endpoint = <&panel_ep>;
+			};
+		};
+	};
