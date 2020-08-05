@@ -1717,6 +1717,14 @@
 		};
 	};
 
+	uart8_rtscts_pins_a: uart8rtscts-0 {
+		pins {
+			pinmux = <STM32_PINMUX('G', 7, AF8)>, /* UART8_RTS */
+				 <STM32_PINMUX('G', 10, AF8)>; /* UART8_CTS */
+			bias-disable;
+		};
+	};
+
 	usbotg_hs_pins_a: usbotg-hs-0 {
 		pins {
 			pinmux = <STM32_PINMUX('A', 10, ANALOG)>; /* OTG_ID */
