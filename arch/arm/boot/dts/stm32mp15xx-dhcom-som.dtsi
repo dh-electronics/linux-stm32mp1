@@ -301,7 +301,7 @@
 		compatible = "ti,tsc2004";
 		reg = <0x49>;
 		vio-supply = <&v3v3>;
-		interrupts-extended = <&gpioh 3 IRQ_TYPE_EDGE_FALLING>;
+		interrupts-extended = <&gpioh 15 IRQ_TYPE_EDGE_FALLING>;
 	};
 
 	eeprom@50 {
