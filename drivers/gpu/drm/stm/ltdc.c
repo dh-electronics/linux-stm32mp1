@@ -507,6 +507,25 @@ static bool ltdc_crtc_mode_fixup(struct drm_crtc *crtc,
 {
 	struct ltdc_device *ldev = crtc_to_ltdc(crtc);
 	int rate = mode->clock * 1000;
+	int rate_min = clk_round_rate(ldev->pixel_clk, rate);
+	int rate_max = clk_round_rate(ldev->pixel_clk, rate + (rate / 10));
+
+	/*
+	 * If the delta between requested pixelclock and resulting pixelclock
+	 * is larger than the delta between requested pixelclock and the next
+	 * step in available pixelclock (limited to 10% of pixelclock to avoid
+	 * too much out-of-specification operation), use the faster pixelclock.
+	 *
+	 * This fixes the condition where the resulting pixelclock is much
+	 * slower than the lowest clock rate supported by the display, while
+	 * the next available pixelclock are just slightly faster than the
+	 * highest clock rate supported by the display. Using the lower clock
+	 * rate leads e.g. to subtle artifacts barely visible on the display,
+	 * like flickering pixels. Using slightly faster clock leads to no
+	 * such effect.
+	 */
+	if (rate - rate_min > rate_max - rate)
+		rate = rate_max;
 
 	if (clk_set_rate(ldev->pixel_clk, rate) < 0) {
 		DRM_ERROR("Cannot set rate (%dHz) for pixel clk\n", rate);
