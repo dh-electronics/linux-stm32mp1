@@ -22,6 +22,7 @@
 #include <linux/mii.h>
 #include <linux/platform_device.h>
 #include <linux/delay.h>
+#include <linux/eeprom_93cx6.h>
 #include <linux/slab.h>
 #include <linux/ks8851_mll.h>
 #include <linux/of.h>
@@ -119,6 +120,7 @@ struct ks_net {
 	struct mutex      	lock; /* spinlock to be interrupt safe */
 	struct platform_device *pdev;
 	struct mii_if_info	mii;
+	struct eeprom_93cx6	eeprom;
 	struct type_frame_head	*frame_head_info;
 	spinlock_t		statelock;
 	u32			msg_enable;
@@ -128,6 +130,7 @@ struct ks_net {
 	u16			rc_rxqcr;
 	u16			rc_txcr;
 	u16			rc_ier;
+	u16			rc_ccr;
 	u16			sharedbus;
 	u16			cmd_reg_cache;
 	u16			cmd_reg_cache_int;
@@ -353,6 +356,8 @@ static void ks_read_config(struct ks_net *ks)
 		ks->bus_width = ENUM_BUS_32BIT;
 		ks->extra_byte = 4;
 	}
+
+	ks->rc_ccr = reg_data;
 }
 
 /**
@@ -922,6 +927,19 @@ static void ks_set_rx_mode(struct net_device *netdev)
 	}
 } /* ks_set_rx_mode */
 
+static void ks_read_mac_addr(struct net_device *dev)
+{
+	struct ks_net *ks = netdev_priv(dev);
+	u16 reg;
+	int i;
+
+	for (i = 0; i < ETH_ALEN; i += 2) {
+		reg = ks_rdreg16(ks, KS_MAR(i));
+		dev->dev_addr[i] = reg >> 8;
+		dev->dev_addr[i + 1] = reg & 0xff;
+	}
+}
+
 static void ks_set_mac(struct ks_net *ks, u8 *data)
 {
 	u16 *pw = (u16 *)data;
@@ -1033,12 +1051,152 @@ static int ks_nway_reset(struct net_device *netdev)
 	return mii_nway_restart(&ks->mii);
 }
 
+/* EEPROM support */
+
+static void ks8851_eeprom_regread(struct eeprom_93cx6 *ee)
+{
+	struct ks_net *ks = ee->data;
+	unsigned val;
+
+	val = ks_rdreg16(ks, KS_EEPCR);
+
+	ee->reg_data_out = (val & EEPCR_EESB) ? 1 : 0;
+	ee->reg_data_clock = (val & EEPCR_EESCK) ? 1 : 0;
+	ee->reg_chip_select = (val & EEPCR_EECS) ? 1 : 0;
+}
+
+static void ks8851_eeprom_regwrite(struct eeprom_93cx6 *ee)
+{
+	struct ks_net *ks = ee->data;
+	unsigned val = EEPCR_EESA;	/* default - eeprom access on */
+
+	if (ee->drive_data)
+		val |= EEPCR_EESRWA;
+	if (ee->reg_data_in)
+		val |= EEPCR_EEDO;
+	if (ee->reg_data_clock)
+		val |= EEPCR_EESCK;
+	if (ee->reg_chip_select)
+		val |= EEPCR_EECS;
+
+	ks_wrreg16(ks, KS_EEPCR, val);
+}
+
+/**
+ * ks8851_eeprom_claim - claim device EEPROM and activate the interface
+ * @ks: The network device state.
+ *
+ * Check for the presence of an EEPROM, and then activate software access
+ * to the device.
+ */
+static int ks8851_eeprom_claim(struct ks_net *ks)
+{
+	if (!(ks->rc_ccr & CCR_EEPROM))
+		return -ENOENT;
+
+	mutex_lock(&ks->lock);
+
+	/* start with clock low, cs high */
+	ks_wrreg16(ks, KS_EEPCR, EEPCR_EESA | EEPCR_EECS);
+	return 0;
+}
+
+/**
+ * ks8851_eeprom_release - release the EEPROM interface
+ * @ks: The device state
+ *
+ * Release the software access to the device EEPROM
+ */
+static void ks8851_eeprom_release(struct ks_net *ks)
+{
+	unsigned val = ks_rdreg16(ks, KS_EEPCR);
+
+	ks_wrreg16(ks, KS_EEPCR, val & ~EEPCR_EESA);
+	mutex_unlock(&ks->lock);
+}
+
+#define KS_EEPROM_MAGIC (0x00008851)
+
+static int ks8851_set_eeprom(struct net_device *dev,
+			     struct ethtool_eeprom *ee, u8 *data)
+{
+	struct ks_net *ks = netdev_priv(dev);
+	int offset = ee->offset;
+	int len = ee->len;
+	u16 tmp;
+
+	/* currently only support byte writing */
+	if (len != 1)
+		return -EINVAL;
+
+	if (ee->magic != KS_EEPROM_MAGIC)
+		return -EINVAL;
+
+	if (ks8851_eeprom_claim(ks))
+		return -ENOENT;
+
+	eeprom_93cx6_wren(&ks->eeprom, true);
+
+	/* ethtool currently only supports writing bytes, which means
+	 * we have to read/modify/write our 16bit EEPROMs */
+
+	eeprom_93cx6_read(&ks->eeprom, offset/2, &tmp);
+
+	if (offset & 1) {
+		tmp &= 0xff;
+		tmp |= *data << 8;
+	} else {
+		tmp &= 0xff00;
+		tmp |= *data;
+	}
+
+	eeprom_93cx6_write(&ks->eeprom, offset/2, tmp);
+	eeprom_93cx6_wren(&ks->eeprom, false);
+
+	ks8851_eeprom_release(ks);
+
+	return 0;
+}
+
+static int ks8851_get_eeprom(struct net_device *dev,
+			     struct ethtool_eeprom *ee, u8 *data)
+{
+	struct ks_net *ks = netdev_priv(dev);
+	int offset = ee->offset;
+	int len = ee->len;
+
+	/* must be 2 byte aligned */
+	if (len & 1 || offset & 1)
+		return -EINVAL;
+
+	if (ks8851_eeprom_claim(ks))
+		return -ENOENT;
+
+	ee->magic = KS_EEPROM_MAGIC;
+
+	eeprom_93cx6_multiread(&ks->eeprom, offset/2, (__le16 *)data, len/2);
+	ks8851_eeprom_release(ks);
+
+	return 0;
+}
+
+static int ks8851_get_eeprom_len(struct net_device *dev)
+{
+	struct ks_net *ks = netdev_priv(dev);
+
+	/* currently, we assume it is an 93C46 attached, so return 128 */
+	return ks->rc_ccr & CCR_EEPROM ? 128 : 0;
+}
+
 static const struct ethtool_ops ks_ethtool_ops = {
 	.get_drvinfo	= ks_get_drvinfo,
 	.get_msglevel	= ks_get_msglevel,
 	.set_msglevel	= ks_set_msglevel,
 	.get_link	= ks_get_link,
 	.nway_reset	= ks_nway_reset,
+	.get_eeprom_len	= ks8851_get_eeprom_len,
+	.get_eeprom	= ks8851_get_eeprom,
+	.set_eeprom	= ks8851_set_eeprom,
 	.get_link_ksettings = ks_get_link_ksettings,
 	.set_link_ksettings = ks_set_link_ksettings,
 };
@@ -1281,6 +1439,13 @@ static int ks8851_probe(struct platform_device *pdev)
 	netdev->netdev_ops = &ks_netdev_ops;
 	netdev->ethtool_ops = &ks_ethtool_ops;
 
+	/* setup EEPROM state */
+
+	ks->eeprom.data = ks;
+	ks->eeprom.width = PCI_EEPROM_WIDTH_93C46;
+	ks->eeprom.register_read = ks8851_eeprom_regread;
+	ks->eeprom.register_write = ks8851_eeprom_regwrite;
+
 	/* setup mii state */
 	ks->mii.dev             = netdev;
 	ks->mii.phy_id          = 1,
@@ -1329,6 +1494,12 @@ static int ks8851_probe(struct platform_device *pdev)
 		mac = of_get_mac_address(pdev->dev.of_node);
 		if (!IS_ERR(mac))
 			ether_addr_copy(ks->mac_addr, mac);
+	} else if (ks->rc_ccr & CCR_EEPROM) {
+		ks_read_mac_addr(netdev);
+		if (!is_valid_ether_addr(netdev->dev_addr)) {
+			netdev_err(netdev, "invalid mac address read %pM\n",
+				   netdev->dev_addr);
+		}
 	} else {
 		struct ks8851_mll_platform_data *pdata;
 
@@ -1353,8 +1524,9 @@ static int ks8851_probe(struct platform_device *pdev)
 
 	id = ks_rdreg16(ks, KS_CIDER);
 
-	netdev_info(netdev, "Found chip, family: 0x%x, id: 0x%x, rev: 0x%x\n",
-		    (id >> 8) & 0xff, (id >> 4) & 0xf, (id >> 1) & 0x7);
+	netdev_info(netdev, "Found chip, family: 0x%x, id: 0x%x, rev: 0x%x, %s EEPROM\n",
+		    (id >> 8) & 0xff, (id >> 4) & 0xf, (id >> 1) & 0x7,
+		    ks->rc_ccr & CCR_EEPROM ? "has" : "no");
 	return 0;
 
 err_pdata:
