@@ -15,6 +15,7 @@
 struct lvds_encoder {
 	struct drm_bridge bridge;
 	struct drm_bridge *panel_bridge;
+	struct drm_bridge_timings timings;
 	struct gpio_desc *powerdown_gpio;
 };
 
@@ -62,6 +63,7 @@ static int lvds_encoder_probe(struct platform_device *pdev)
 	struct device_node *panel_node;
 	struct drm_panel *panel;
 	struct lvds_encoder *lvds_encoder;
+	u32 val;
 
 	lvds_encoder = devm_kzalloc(dev, sizeof(*lvds_encoder), GFP_KERNEL);
 	if (!lvds_encoder)
@@ -110,12 +112,19 @@ static int lvds_encoder_probe(struct platform_device *pdev)
 	if (IS_ERR(lvds_encoder->panel_bridge))
 		return PTR_ERR(lvds_encoder->panel_bridge);
 
+	if (!of_property_read_u32(dev->of_node, "pixelclk-active", &val)) {
+		lvds_encoder->timings.input_bus_flags = val ?
+			DRM_BUS_FLAG_PIXDATA_SAMPLE_NEGEDGE :
+			DRM_BUS_FLAG_PIXDATA_SAMPLE_POSEDGE;
+	}
+
 	/* The panel_bridge bridge is attached to the panel's of_node,
 	 * but we need a bridge attached to our of_node for our user
 	 * to look up.
 	 */
 	lvds_encoder->bridge.of_node = dev->of_node;
 	lvds_encoder->bridge.funcs = &funcs;
+	lvds_encoder->bridge.timings = &lvds_encoder->timings;
 	drm_bridge_add(&lvds_encoder->bridge);
 
 	platform_set_drvdata(pdev, lvds_encoder);
