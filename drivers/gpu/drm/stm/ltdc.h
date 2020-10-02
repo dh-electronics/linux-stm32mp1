@@ -37,6 +37,8 @@ struct ltdc_device {
 	u32 irq_status;
 	struct fps_info plane_fpsi[LTDC_MAX_LAYER];
 	struct drm_atomic_state *suspend_state;
+	struct drm_bridge *bridge;
+	struct drm_connector *connector;
 };
 
 bool ltdc_crtc_scanoutpos(struct drm_device *dev, unsigned int pipe,
