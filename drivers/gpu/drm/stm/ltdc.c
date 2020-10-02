@@ -569,10 +569,16 @@ static void ltdc_crtc_mode_set_nofb(struct drm_crtc *crtc)
 	struct drm_device *ddev = crtc->dev;
 	struct drm_display_mode *mode = &crtc->state->adjusted_mode;
 	struct videomode vm;
+	u32 bus_flags = 0;
 	u32 hsync, vsync, accum_hbp, accum_vbp, accum_act_w, accum_act_h;
 	u32 total_width, total_height;
 	u32 val;
 	int ret;
+
+	if (ldev->bridge && ldev->bridge->timings)
+		bus_flags = ldev->bridge->timings->input_bus_flags;
+	else if (ldev->connector)
+		bus_flags = ldev->connector->display_info.bus_flags;
 
 	if (!pm_runtime_active(ddev->dev)) {
 		ret = pm_runtime_get_sync(ddev->dev);
@@ -609,10 +615,10 @@ static void ltdc_crtc_mode_set_nofb(struct drm_crtc *crtc)
 	if (vm.flags & DISPLAY_FLAGS_VSYNC_HIGH)
 		val |= GCR_VSPOL;
 
-	if (vm.flags & DISPLAY_FLAGS_DE_LOW)
+	if (bus_flags & DRM_BUS_FLAG_DE_LOW)
 		val |= GCR_DEPOL;
 
-	if (vm.flags & DISPLAY_FLAGS_PIXDATA_NEGEDGE)
+	if (bus_flags & DRM_BUS_FLAG_PIXDATA_DRIVE_NEGEDGE)
 		val |= GCR_PCPOL;
 
 	reg_update_bits(ldev->regs, LTDC_GCR,
@@ -1064,6 +1070,8 @@ static const struct drm_encoder_funcs ltdc_encoder_funcs = {
 
 static int ltdc_encoder_init(struct drm_device *ddev, struct drm_bridge *bridge)
 {
+	struct ltdc_device *ldev = ddev->dev_private;
+	struct drm_connector_list_iter iter;
 	struct drm_encoder *encoder;
 	int ret;
 
@@ -1082,6 +1090,16 @@ static int ltdc_encoder_init(struct drm_device *ddev, struct drm_bridge *bridge)
 		drm_encoder_cleanup(encoder);
 		return -EINVAL;
 	}
+
+	ldev->bridge = bridge;
+
+	/*
+	 * Get hold of the connector. This is a bit of a hack, until the bridge
+	 * API gives us bus flags and formats.
+	 */
+	drm_connector_list_iter_begin(ddev, &iter);
+	ldev->connector = drm_connector_list_iter_next(&iter);
+	drm_connector_list_iter_end(&iter);
 
 	DRM_DEBUG_DRIVER("Bridge encoder:%d created\n", encoder->base.id);
 
