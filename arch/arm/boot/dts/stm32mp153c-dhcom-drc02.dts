@@ -19,6 +19,22 @@
 	compatible = "dh,stm32mp153c-dhcom-drc02", "dh,stm32mp153c-dhcom-som",
 		     "st,stm32mp153";
 };
+&spi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1_pins_a>;
+	cs-gpios = <&gpioz 3 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+	/delete-property/dmas;
+	/delete-property/dma-names;
+ 
+	spidev@0 {
+		compatible = "dh,dhcom-board";
+		reg = <0>;
+		spi-max-frequency = <54000000>;
+		spi-cpha; /* Shifted clock phase (CPHA) mode */
+		spi-cpol; /* Inverse clock polarity (CPOL) mode */
+	};
+};
 
 &m_can1 {
 	pinctrl-names = "default", "sleep";
