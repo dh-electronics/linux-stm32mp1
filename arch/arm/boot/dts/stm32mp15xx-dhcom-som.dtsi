@@ -393,7 +393,6 @@
 	broken-cd;
 	st,sig-dir;
 	st,neg-edge;
-	st,use-ckin;
 	bus-width = <4>;
 	vmmc-supply = <&vdd_sd>;
 	status = "okay";
