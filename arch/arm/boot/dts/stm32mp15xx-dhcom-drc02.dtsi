@@ -41,19 +41,8 @@
 	};
 };
 
-&gpiod {
-	gpio-line-names = "", "", "", "",
-			  "", "", "", "",
-			  "", "", "", "Out1",
-			  "Out2", "", "", "";
-};
 
 &gpioi {
-	gpio-line-names = "In1", "", "", "",
-			  "", "", "", "",
-			  "In2", "", "", "",
-			  "", "", "", "";
-
 	/*
 	 * NOTE: The USB Hub on the DRC02 needs a reset signal to be
 	 * pulled high in order to be detected by the USB Controller.
