@@ -22,7 +22,7 @@
 #include "rsi_hal.h"
 
 /* Default operating mode is wlan STA + BT */
-static u16 dev_oper_mode = DEV_OPMODE_STA_BT_DUAL;
+static u16 dev_oper_mode = DEV_OPMODE_WIFI_ALONE;
 module_param(dev_oper_mode, ushort, 0444);
 MODULE_PARM_DESC(dev_oper_mode,
 		 "1[Wi-Fi], 4[BT], 8[BT LE], 5[Wi-Fi STA + BT classic]\n"
