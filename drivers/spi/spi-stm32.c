@@ -971,8 +971,8 @@ static irqreturn_t stm32h7_spi_irq_thread(int irq, void *dev_id)
 	spin_unlock_irqrestore(&spi->lock, flags);
 
 	if (end) {
-		stm32h7_spi_disable(spi);
 		spi_finalize_current_transfer(master);
+		stm32h7_spi_disable(spi);
 	}
 
 	return IRQ_HANDLED;
