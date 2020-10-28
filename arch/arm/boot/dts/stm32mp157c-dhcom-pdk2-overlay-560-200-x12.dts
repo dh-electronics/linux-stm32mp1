@@ -3,6 +3,7 @@
  * Copyright (C) 2020 Marek Vasut <marex@denx.de>
  */
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/pwm/pwm.h>
 
@@ -20,6 +21,25 @@
 		default-brightness-level = <8>;
 		enable-gpios = <&gpioi 0 GPIO_ACTIVE_HIGH>;
 		status = "okay";
+	};
+
+	gpio-keys {
+		/*
+		 * The EXTi IRQ line 6 is shared with touchscreen IRQ,
+		 * so operate button-1 as polled GPIO key.
+		 */
+		button-1 {
+			/* Use status as /delete-node/ does not work in DTOs */
+			status = "disabled";
+		};
+	};
+
+	gpio-keys-polled {
+		button-1 {
+			label = "TA2-GPIO-B";
+			linux,code = <KEY_B>;
+			gpios = <&gpiod 6 GPIO_ACTIVE_LOW>;
+		};
 	};
 
 	led {
@@ -81,8 +101,8 @@
 		compatible = "edt,edt-ft5x06";
 		reg = <0x38>;
 		/* Touchscreen IRQ GPIO-E conflicts with LED5 GPIO */
-		interrupt-parent = <&gpiog>;
-		interrupts = <2 IRQ_TYPE_EDGE_FALLING>; /* GPIO E */
+		interrupt-parent = <&gpioc>;
+		interrupts = <6 IRQ_TYPE_EDGE_FALLING>; /* GPIO E */
 		linux,wakeup;
 	};
 };
