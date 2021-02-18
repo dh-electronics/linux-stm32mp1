@@ -6,13 +6,14 @@
 /plugin/;
 
 #include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/input/input.h>
 
 &spi1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&spi1_pins_a>;
 	cs-gpios = <&gpioz 3 GPIO_ACTIVE_HIGH>;
 	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 
 	spidev@0 {
 		compatible = "dh,dhcom-board";
