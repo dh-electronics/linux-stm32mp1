@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2021 Martina Schmöller <mschmoeller@dh-electronics.com>
+ */
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&spi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1_pins_a>;
+	cs-gpios = <&gpioz 3 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	spidev@0 {
+		compatible = "dh,dhcom-board";
+		reg = <0>;
+		spi-max-frequency = <54000000>;
+		spi-cpha; /* Shifted clock phase (CPHA) mode */
+		spi-cpol; /* Inverse clock polarity (CPOL) mode */
+	};
+};
