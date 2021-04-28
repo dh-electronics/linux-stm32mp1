@@ -1086,6 +1086,7 @@ dtb-$(CONFIG_ARCH_STM32) += \
 	stm32mp15xx-dhcom-pdk2-overlay-638-100-x12-rpi7inch.dtbo \
 	stm32mp15xx-dhcom-pdk2-overlay-672-100-x18.dtbo \
 	stm32mp15xx-dhcom-pdk2-overlay-spi1.dtbo \
+	stm32mp157c-dhcom-evohmi.dtb \
 	stm32mp15xx-dhcom-EvoHMI-overlay-43res-TF043WQBS-36P.dtbo \
 	stm32mp157c-dhcom-picoitx.dtb \
 	stm32mp15xx-dhcom-picoitx-overlay-626-100-x2-ch101olhlwh.dtbo \
