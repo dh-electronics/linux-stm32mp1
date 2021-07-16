@@ -35,6 +35,12 @@
 	/delete-property/dmas;
 	/delete-property/dma-names;
 	status = "okay";
+
+	eepromdib@50 {
+		compatible = "atmel,24c16";
+		reg = <0x50>;
+		pagesize = <16>;
+	};
 };
 
 &i2c5 {	/* DHCOM I2C 1 (/dev/i2c-1) */
