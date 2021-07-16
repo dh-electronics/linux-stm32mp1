@@ -25,7 +25,7 @@
 	status = "okay";
 };
 
-&i2c2 {	/* Header X22 */
+&i2c2 {	/* DHCOM I2C 2 (/dev/i2c-0) */
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c2_pins_a>;
 	i2c-scl-rising-time-ns = <185>;
@@ -37,7 +37,7 @@
 	status = "okay";
 };
 
-&i2c5 {	/* Header X21 */
+&i2c5 {	/* DHCOM I2C 1 (/dev/i2c-1) */
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c5_pins_a>;
 	i2c-scl-rising-time-ns = <185>;
@@ -46,6 +46,12 @@
 	/* spare dmas for other usage */
 	/delete-property/dmas;
 	/delete-property/dma-names;
+	
+	eepromhmi@50 {
+		compatible = "atmel,24c16";
+		reg = <0x50>;
+		pagesize = <16>;
+	};
 };
 
 
