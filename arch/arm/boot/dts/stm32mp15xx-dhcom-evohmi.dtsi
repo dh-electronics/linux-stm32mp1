@@ -17,6 +17,15 @@
 		stdout-path = "serial0:115200n8";
 	};
 
+	led {
+		compatible = "gpio-leds";
+
+		led-status {
+			label = "orange:led-status";
+			gpios = <&gpiob 8 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+	};
 };
 
 &cec {
