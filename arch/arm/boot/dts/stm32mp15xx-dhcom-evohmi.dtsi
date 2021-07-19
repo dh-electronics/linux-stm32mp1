@@ -37,7 +37,7 @@
 	status = "okay";
 
 	eepromdib@50 {
-		compatible = "atmel,24c16";
+		compatible = "microchip,24c16", "atmel,24c16";
 		reg = <0x50>;
 		pagesize = <16>;
 	};
@@ -54,7 +54,7 @@
 	/delete-property/dma-names;
 	
 	eepromhmi@50 {
-		compatible = "atmel,24c16";
+		compatible = "microchip,24c16", "atmel,24c16";
 		reg = <0x50>;
 		pagesize = <16>;
 	};
