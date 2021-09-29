@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2021 Marek Vasut <marex@denx.de>
+ */
+/dts-v1/;
+/plugin/;
+
+&sdmmc3 {
+	broken-cd;
+	cd-gpios;
+};
