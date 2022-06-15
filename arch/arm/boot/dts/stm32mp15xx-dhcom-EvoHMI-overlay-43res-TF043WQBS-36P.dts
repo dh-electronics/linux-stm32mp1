@@ -89,7 +89,7 @@
 			pinmux = <STM32_PINMUX('I', 14, AF14)>; /* LCD_CLK */
 			bias-disable;
 			drive-push-pull;
-			slew-rate = <1>;
+			slew-rate = <0>;
 		};
 		pins2 {
 				pinmux = <STM32_PINMUX('I', 12, AF14)>, /* LCD_HSYNC */
